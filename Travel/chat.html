@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Travel Agent • NomadAI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex flex-col">
+  <header class="bg-slate-900 border-b border-slate-700 p-4">
+    <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-cyan-400">NomadAI Chat</h1>
+      <a href="index.html" class="text-cyan-300 hover:text-cyan-100">Back Home</a>
+    </div>
+  </header>
+  <main class="flex-1 max-w-4xl mx-auto w-full p-6 flex flex-col">
+    <div id="messages" class="flex-1 overflow-y-auto space-y-4 bg-slate-900 rounded-3xl p-6 mb-4"></div>
+    <div class="flex gap-3">
+      <input id="userInput" type="text" placeholder="Ask anything…" class="flex-1 bg-slate-800 rounded-3xl px-5 py-3 outline-none" />
+      <button onclick="sendMessage()" class="bg-cyan-400 hover:bg-cyan-300 text-black px-6 rounded-3xl font-bold">Send</button>
+    </div>
+  </main>
+  <script src="assets/js/ai-chat.js"></script>
+</body>
+</html>

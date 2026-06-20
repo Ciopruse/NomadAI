@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plan Your Trip • NomadAI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-slate-950 text-white min-h-screen">
+  <header class="bg-slate-900 border-b border-slate-700 p-4">
+    <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-cyan-400">NomadAI</h1>
+      <a href="index.html" class="text-cyan-300 hover:text-cyan-100">Back Home</a>
+    </div>
+  </header>
+  <main class="max-w-4xl mx-auto p-6">
+    <h2 class="text-4xl font-bold mb-6">Tell AI what you want</h2>
+    <form id="planForm" class="bg-slate-900 rounded-3xl p-8 space-y-6">
+      <label class="block text-sm">Destination<input id="destination" type="text" class="mt-2 w-full bg-slate-800 rounded-2xl px-4 py-3" placeholder="Paris, Bali, New York"></label>
+      <label class="block text-sm">Budget (₹)<input id="budget" type="number" class="mt-2 w-full bg-slate-800 rounded-2xl px-4 py-3" placeholder="80000"></label>
+      <label class="block text-sm">Start Date<input id="date" type="date" class="mt-2 w-full bg-slate-800 rounded-2xl px-4 py-3"></label>
+      <label class="block text-sm">Number of People<input id="people" type="number" class="mt-2 w-full bg-slate-800 rounded-2xl px-4 py-3" value="2"></label>
+      <button type="submit" class="w-full bg-cyan-400 text-black py-3 rounded-3xl font-bold">Generate Itinerary</button>
+    </form>
+    <div id="itineraryResult" class="hidden mt-6 bg-slate-800 rounded-3xl p-6"></div>
+  </main>
+  <script>
+    document.getElementById('planForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const dest = document.getElementById('destination').value || 'Bali';
+      const budget = Number(document.getElementById('budget').value || 50000);
+      const date = document.getElementById('date').value || '2026-04-15';
+      const people = Number(document.getElementById('people').value || 2);
+      
+      const result = document.getElementById('itineraryResult');
+      result.classList.remove('hidden');
+      result.innerHTML = '<div class="text-center"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto mb-4"></div><p>AI is generating your personalized itinerary...</p></div>';
+
+      try {
+        const res = await fetch('http://localhost:5000/api/itinerary/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ destination: dest, budget, startDate: date, people })
+        });
+
+        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+
+        const data = await res.json();
+        
+        result.innerHTML = `
+          <h3 class="text-2xl font-semibold mb-4">✨ AI Generated Itinerary for ${dest}</h3>
+          <p class="mb-4 text-cyan-400">Budget: ₹${budget.toLocaleString()} • People: ${people} • Start: ${new Date(date).toLocaleDateString()}</p>
+          <div class="bg-slate-900 p-4 rounded-2xl mb-4 whitespace-pre-line">${data.itinerary}</div>
+          <button onclick="bookTrip('${dest}', ${budget}, '${date}', ${people})" class="w-full bg-green-500 hover:bg-green-400 text-white py-3 rounded-3xl font-bold">Book This Trip →</button>
+        `;
+
+      } catch (err) {
+        console.error("Frontend Error:", err);
+        result.innerHTML = `
+          <h3 class="text-2xl font-semibold mb-4">📝 Basic Itinerary for ${dest}</h3>
+          <p class="mb-4">Budget: ₹${budget.toLocaleString()} • People: ${people}</p>
+          <div class="bg-slate-900 p-4 rounded-2xl mb-4">
+            <strong>Day 1:</strong> Arrival, city orientation, local cuisine<br>
+            <strong>Day 2:</strong> Top attractions + guided experiences<br>
+            <strong>Day 3:</strong> Leisure day and local market<br>
+            <strong>Day 4:</strong> Cultural experiences<br>
+            <strong>Day 5:</strong> Adventure activities<br>
+            <strong>Day 6:</strong> Shopping and relaxation<br>
+            <strong>Day 7:</strong> Departure day
+          </div>
+          <p class="text-red-400">⚠️ AI service temporarily unavailable. Showing basic plan.</p>
+          <button onclick="bookTrip('${dest}', ${budget}, '${date}', ${people})" class="w-full bg-green-500 hover:bg-green-400 text-white py-3 rounded-3xl font-bold mt-4">Book This Trip →</button>
+        `;
+      }
+    });
+
+    async function bookTrip(destination, budget, startDate, people) {
+      try {
+        const res = await fetch('http://localhost:5000/api/bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ destination, budget, startDate, people })
+        });
+        
+        if (res.ok) {
+          alert('✅ Trip booked successfully! Check "My Bookings" to confirm.');
+          window.location.href = 'bookings.html';
+        } else {
+          alert('❌ Booking failed. Please try again.');
+        }
+      } catch (err) {
+        alert('❌ Connection error. Is backend running?');
+      }
+    }
+  </script>
+</body>
+</html>
